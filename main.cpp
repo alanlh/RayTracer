@@ -18,7 +18,7 @@ int main() {
   sphere1->radius_ = 1;
   sphere1->surface_color_.h = 30;
   sphere1->surface_color_.s = 1;
-  sphere1->surface_color_.l = 0.25;
+  sphere1->surface_color_.l = 0.5;
   scene->AddDrawable(sphere1);
 
   Sphere *sphere2 = new Sphere();
@@ -26,7 +26,7 @@ int main() {
   sphere2->radius_ = 1;
   sphere2->surface_color_.h = 210;
   sphere2->surface_color_.s = 1;
-  sphere2->surface_color_.l = 0.25;
+  sphere2->surface_color_.l = 0.5;
   scene->AddDrawable(sphere2);
 
   Sphere *sphere3 = new Sphere();
@@ -34,7 +34,7 @@ int main() {
   sphere3->radius_ = 1;
   sphere3->surface_color_.h = 240;
   sphere3->surface_color_.s = 0;
-  sphere3->surface_color_.l = 0.25;
+  sphere3->surface_color_.l = 0.5;
   scene->AddDrawable(sphere3);
 
   Sphere *sphere4 = new Sphere();
@@ -42,7 +42,7 @@ int main() {
   sphere4->radius_ = 1;
   sphere4->surface_color_.h = 30;
   sphere4->surface_color_.s = 1;
-  sphere4->surface_color_.l = 0.25;
+  sphere4->surface_color_.l = 0.5;
   scene->AddDrawable(sphere4);
 
   Sphere *sphere5 = new Sphere();
@@ -50,7 +50,7 @@ int main() {
   sphere5->radius_ = 1;
   sphere5->surface_color_.h = 210;
   sphere5->surface_color_.s = 1;
-  sphere5->surface_color_.l = 0.25;
+  sphere5->surface_color_.l = 0.5;
   scene->AddDrawable(sphere5);
 
   Triangle *triangle1 = new Triangle();
@@ -59,7 +59,7 @@ int main() {
   triangle1->c_ = Vector3(10, -2, 2);
   triangle1->surface_color_.h = 0;
   triangle1->surface_color_.s = 0;
-  triangle1->surface_color_.l = 0;
+  triangle1->surface_color_.l = 0.5;
   scene->AddDrawable(triangle1);
 
   Triangle *triangle2 = new Triangle();
@@ -68,7 +68,7 @@ int main() {
   triangle2->c_ = Vector3(10, -2, 2);
   triangle2->surface_color_.h = 0;
   triangle2->surface_color_.s = 0;
-  triangle2->surface_color_.l = 0;
+  triangle2->surface_color_.l = 0.5;
   scene->AddDrawable(triangle2);
 
   Plane *plane1 = new Plane();
@@ -77,7 +77,7 @@ int main() {
   plane1->c_ = Vector3(10, -4, -3);
   plane1->surface_color_.h = 150;
   plane1->surface_color_.s = 1;
-  plane1->surface_color_.l = 0;
+  plane1->surface_color_.l = 0.5;
   scene->AddDrawable(plane1);
 
   Plane *plane2 = new Plane();
@@ -86,24 +86,24 @@ int main() {
   plane2->c_ = Vector3(10, 4, 3);
   plane2->surface_color_.h = 210;
   plane2->surface_color_.s = 1;
-  plane2->surface_color_.l = 0;
+  plane2->surface_color_.l = 0.5;
   scene->AddDrawable(plane2);
   
   Scene::AmbientLight *ambient1 = new Scene::AmbientLight();
-  ambient1->color = HSLAPixel(60, 0.75, 0.75);
-  ambient1->intensity = 0.15;
+  ambient1->color = HSLAPixel(60, 0.75, 1);
+  ambient1->intensity = 10;
   scene->AddAmbientLight(ambient1);
   
   Scene::LightSource *light1 = new Scene::LightSource();
   light1->direction = Vector3(1, -1, 1);
-  light1->color = HSLAPixel(60, 0, 0.75);
-  light1->intensity = 0.75;
+  light1->color = HSLAPixel(120, 1, 1);
+  light1->intensity = 10;
   scene->AddLightSource(light1);
   
   Scene::LightSource *light2 = new Scene::LightSource();
   light2->direction = Vector3(1, 1, -1);
-  light2->color = HSLAPixel(300, 0, 0.75);
-  light2->intensity = 0.75;
+  light2->color = HSLAPixel(300, 0, 1);
+  light2->intensity = 2;
   scene->AddLightSource(light2);
   
   Vector3 origin(0, 7, 1);
@@ -116,11 +116,11 @@ int main() {
   // Zoom out because Orthogonal field-of-view is much
   scene->SetCamera(origin, 0, canvas, 100);
   
-  PNG * result_orthographic = scene->RenderOrthographic(400, 400);
-  result_orthographic->writeToFile("hello_ortho.png");
+  //PNG * result_orthographic = scene->RenderOrthographic(200, 200);
+  //result_orthographic->writeToFile("hello_ortho.png");
   
   delete scene;
   delete result;
-  delete result_orthographic;
+  //delete result_orthographic;
   return 0;
 }

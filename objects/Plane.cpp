@@ -35,7 +35,7 @@ Vector3 Plane::GetPerpendicular(Ray ray, double d) {
   d = 0;
   Vector3 normal = crossProduct(b_ - a_, c_ - a_);
   if (dotProduct(ray.direction, normal) > 0) {
-   normal = normal;
+    normal = normal * -1;
   }
   return normal;
 }

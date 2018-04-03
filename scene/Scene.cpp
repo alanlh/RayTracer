@@ -11,6 +11,7 @@
 #include "Ray.h"
 #include "Vector3.h"
 #include "../image/ColorMixer.h"
+#include "objects/ObjectTree.h"
 
 Scene::Scene() {
   objects_ = new vector<Drawable *>;
@@ -218,7 +219,7 @@ PNG * Scene::RenderOrthographic(unsigned width, unsigned height) {
 	Vector3 pixel_coordinate = camera_.point + pixel_x_offset + pixel_y_offset;
 	Ray ray(pixel_coordinate, canvas_.center - camera_.point);
 	HSLAPixel color = GetPixColor(ray, 1);
-	final_pix.AddColor(color, 0, color.l);
+	final_pix.AddColor(color, 0, 1);
       }
       HSLAPixel& image_pix = *(image->getPixel(i, j));
       image_pix = final_pix.RenderAntiAlias();
@@ -248,15 +249,18 @@ HSLAPixel Scene::GetPixColor(Ray ray, unsigned iteration) {
   }
   ColorMixer pix;
   if (closestObject != NULL) {
-    pix.AddColor(closestObject->surface_color_, ColorMixer::surface_color_, 0);
+    pix.AddObject(closestObject);
+
     Vector3 perp = closestObject->GetPerpendicular(ray, minDistance);
     for (LightSource *light : *lights_) {
+      // If light->direction = 0, then create vector by comparing the start point.
+      
       double weight = dotProduct(perp, light->direction) /
 	(perp.magnitude() * light->direction.magnitude());
       if (weight < 0) {
 	// TODO: Implement operator* on HSLAPixel
-	double intensity = light->intensity * weight * -1;
-	pix.AddColor(light->color, ColorMixer::directional_light_, intensity);
+	pix.AddColor(light->color, ColorMixer::light_,
+		     light->intensity * closestObject->diffusion_ * weight * -1);
       } else {
 	//cs225::HSLAPixel unseen_light = cs225::HSLAPixel(light->color.h, light->color.s, 0);
 	//pix.AddColor(unseen_light, ColorMixer::directional_light_);
@@ -264,7 +268,11 @@ HSLAPixel Scene::GetPixColor(Ray ray, unsigned iteration) {
     }
   }
   for (AmbientLight *ambient : *ambients_) {
-    pix.AddColor(ambient->color, ColorMixer::ambient_light_, ambient->intensity);
+    double intensity = ambient->intensity;
+    if (closestObject != NULL) {
+      intensity *= closestObject->ambient_;
+    }
+    pix.AddColor(ambient->color, ColorMixer::light_, intensity);
   }
   return pix.RenderObjectColor();
 }

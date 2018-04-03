@@ -12,7 +12,7 @@ render: main.o $(SCENE_EXE) $(OBJECTS_EXE) $(IMAGE_EXE)
 main.o:main.cpp scene/Scene.h image/HSLAPixel.h image/lodepng/lodepng.h image/PNG.h objects/Drawable.h objects/Sphere.h objects/Triangle.h objects/Plane.h scene/Vector3.h image/ColorMixer.h
 	clang++ $(CXXFLAGS) main.cpp -c
 
-Scene.o: scene/Scene.cpp scene/Scene.h image/PNG.h image/HSLAPixel.h scene/Ray.h objects/Drawable.h scene/Vector3.h image/ColorMixer.h
+Scene.o: scene/Scene.cpp scene/Scene.h image/PNG.h image/HSLAPixel.h scene/Ray.h objects/Drawable.h scene/Vector3.h image/ColorMixer.h objects/ObjectTree.h
 	clang++ $(CXXFLAGS) scene/Scene.cpp -c
 
 PNG.o: image/PNG.cpp image/PNG.h image/lodepng/lodepng.h image/RGB_HSL.h
@@ -24,7 +24,7 @@ HSLAPixel.o: image/HSLAPixel.cpp image/HSLAPixel.h
 lodepng.o: image/lodepng/lodepng.cpp image/lodepng/lodepng.h
 	clang++ $(CXXFLAGS) image/lodepng/lodepng.cpp -c
 
-ColorMixer.o: image/ColorMixer.cpp image/ColorMixer.h image/HSLAPixel.h
+ColorMixer.o: image/ColorMixer.cpp image/ColorMixer.h image/HSLAPixel.h objects/Drawable.h scene/Vector3.h
 	clang++ $(CXXFLAGS) image/ColorMixer.cpp -c
 
 Vector3.o: scene/Vector3.cpp scene/Vector3.h
@@ -41,6 +41,9 @@ Triangle.o: objects/Triangle.cpp objects/Triangle.h objects/Drawable.h scene/Vec
 
 Plane.o: objects/Plane.cpp objects/Plane.h objects/Drawable.h scene/Vector3.h scene/Ray.h
 	clang++ $(CXXFLAGS) objects/Plane.cpp -c
+
+ObjectTree.o: objects/ObjectTree.cpp objects/ObjectTree.h Ray.h
+	clang++ $(CXXFLAGS) objects/ObjectTree.cpp -c
 
 clean:
 	rm render *.o

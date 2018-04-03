@@ -9,6 +9,7 @@
 #include "../objects/Drawable.h"
 #include "../image/PNG.h"
 #include "Ray.h"
+#include "objects/ObjectTree.h"
 
 class Scene {
  public:
@@ -61,11 +62,12 @@ class Scene {
    * The coordinates, etc., should be contained within the object. 
    */
   void AddDrawable(Drawable *object);
+  
   /**
    * Goes through the list of objects and determines it is within it.
    * Removes if so. 
    */
-  void RemoveDrawable(Drawable *object);
+  void RemoveObject(Drawable *object);
 
   void AddLightSource(LightSource *light);
   void RemoveLightSource(LightSource *light);

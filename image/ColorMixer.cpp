@@ -4,10 +4,10 @@
 #include "math.h"
 
 #include "HSLAPixel.h"
+#include "../objects/Drawable.h"
 
 ColorMixer::ColorMixer() {
-  surface_weight_ = default_surface_weight_;
-  light_weight_ = default_light_weight_;
+  object_ = NULL;
 }
 
 ColorMixer::ColorMixer(ColorMixer &other) {
@@ -20,8 +20,7 @@ ColorMixer::ColorMixer(ColorMixer &other) {
   for (double intensity : other.intensities) {
     intensities.push_back(intensity);
   }
-  surface_weight_ = other.surface_weight_;
-  light_weight_ = other.light_weight_;
+  object_ = other.object_;
 }
 
 ColorMixer & ColorMixer::operator=(ColorMixer &other) {
@@ -37,9 +36,12 @@ ColorMixer & ColorMixer::operator=(ColorMixer &other) {
   for (double intensity : other.intensities) {
     intensities.push_back(intensity);
   }
-  surface_weight_ = other.surface_weight_;
-  light_weight_ = other.light_weight_;
+  object_ = other.object_;
   return *this;
+}
+
+void ColorMixer::AddObject(Drawable *object) {
+  object_ = object;
 }
 
 void ColorMixer::AddColor(HSLAPixel pix, unsigned type,
@@ -50,95 +52,35 @@ void ColorMixer::AddColor(HSLAPixel pix, unsigned type,
 }
 
 HSLAPixel ColorMixer::RenderObjectColor() {
-  double h = 0;
-  double h_weight = 0;
-  double s = 0;
-  double s_weight = 0;
-  double l = 0;
+  bool is_object = (object_ != NULL);
 
-  double h_object = 0;
-  double s_object = 0;
-  double l_object = 0;
-
-  double ambient_l = 0;
-
-  bool is_object = false;
-  unsigned light_count = 0;
-
-  //double intensity = 0;
-  //double intensity_weight = 0;
-
-  for (unsigned i = 0; i < colors.size(); i ++) {
-    // A variation on the Phong reflection model
-    // Illumination is similar, but I'm using my own color/sat mixing system
-    // TODO: AFTER ADDING INTENSITY, MOVE LUMINOSITY BACK.
-    if (types.at(i) == surface_color_) {
-      // Should only occur once
-      // TODO: Create constants. For now, all weights for surface color is 1
-      h_object = colors.at(i).h;
-      s_object = colors.at(i).s;
-      l_object = colors.at(i).l;
-      is_object = true;
-    } else if (types.at(i) == directional_light_) {
-      // H dependent on S and L, S dependent on L. L is a lot more weighted
-      // h += 0.2 * intensities.at(i) * colors.at(i).h;
-      // h_weight += 0.2 * intensities.at(i);
-      // s += 0.2 * intensities.at(i) * colors.at(i).s;
-      // s_weight += 0.2 * intensities.at(i);
-      //h += 2 * intensities.at(i) * colors.at(i).h;
-      //h_weight += 2 * intensities.at(i);
-      //s += 2 * intensities.at(i) * colors.at(i).s;
-      //s_weight += 2 * intensities.at(i);
-      l += intensities.at(i) * colors.at(i).l;
-      light_count ++;
-      //intensity += 5 * intensities.at(i);
-      //intensity_weight += 5;
-
-    } else if (types.at(i) == ambient_light_) {
-      // Similar to directional light, but less weighted. 
-      //h += 0.05 * intensities.at(i) * colors.at(i).h;
-      //h_weight += 0.05 * intensities.at(i);
-      //s += 0.05 * intensities.at(i) * colors.at(i).s;
-      //s_weight += 0.05 * intensities.at(i);
-      h += 2 * intensities.at(i) * colors.at(i).h;
-      h_weight += 2 * intensities.at(i);
-      s += 2 * intensities.at(i) * colors.at(i).s;
-      s_weight += 2 * intensities.at(i);
-      l += intensities.at(i) * colors.at(i).l;
-
-      ambient_l += intensities.at(i) * colors.at(i).l;
-      light_count ++;
-      //intensity += 2 * intensities.at(i);
-      //intensity_weight += 2;
-    }    
+  HSLAPixel object_color;
+  if (is_object) {
+    object_color = object_->surface_color_;
   }
 
-  if (h_weight > 0) {
-    h /= h_weight;
-  }
-  if (s_weight > 0) {
-    s /= s_weight;
-  }
-  if (light_count > 0 && !is_object) {
-    l /= light_count;
-  }
-  if (is_object && l > 1) {
-    l = 1;
-  }
-  //if (intensity_weight > 0) {
-  // intensity /= intensity_weight;
-  //}
-  //l = sigmoid(0.5 * inverse(l) + 1.5 * intensity);
-  //l = sigmoid(2 * intensity);
-  // std::cout << l << " " << l_object std::endl;
+
+  // bool small_change = false;
   
-  // if (!is_object) {
-  //   return HSLAPixel(h, s, l);
+  HSLAPixel light = colors[0] * intensities[0];
+  // if (intensities[0] < 0.5) {
+  //   std::cout << intensities[0] << " " << colors[0] << std::endl;
+  //   small_change = true;
   // }
+  for (unsigned i = 1; i < colors.size(); i ++) {
+    light = light + colors[i] * intensities[i];
+    // if (intensities[i] < 0.5) {
+    //   std::cout << intensities[i] << " " << colors[i] << std::endl;
+    //   small_change = true;
+    // }
+  }
+  HSLAPixel result = object_color * light;
 
-  l = sigmoid(inverse(ambient_l * l_object) + inverse(l));
+  // if (small_change) {
+  //   std::cout << object_color << " " << light << " " << result << std::endl;
+  // }
   
-  return HSLAPixel(h_object, s_object, l);
+  return result;
 }
 
 HSLAPixel ColorMixer::RenderAntiAlias() {
@@ -151,20 +93,25 @@ HSLAPixel ColorMixer::RenderAntiAlias() {
     }
   }
 
+  double h = 0;
   double s = 0;
   double l = 0;
   unsigned count = 0;
   for (HSLAPixel color : colors) {
-    s += color.s;
-    l += color.l;
-    count ++;
+    // if (fabs(color.h - prominent_hue) < 60) {    
+      h += color.h;
+      s += color.s;
+      l += color.l;
+      count++;
+      //}
   }
   if (count > 0) {
+    h /= count;
     s /= count;
     l /= count;
   }  
   // Blend luminosities and saturation, but keep hue. 
-  return HSLAPixel(prominent_hue, s, l);
+  return HSLAPixel(h, s, l);
 }
 
 double ColorMixer::sigmoid(double in) {

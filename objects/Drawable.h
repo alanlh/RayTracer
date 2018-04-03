@@ -14,9 +14,13 @@ class Drawable {
   virtual Vector3 GetPerpendicular(Ray ray, double d) = 0;
 
   HSLAPixel surface_color_;
-  HSLAPixel emission_color_;
-  double reflection_;
-  double transparency_;
+  double ambient_;
+  double diffusion_;
+  double specular_;
+  double shininess_; // Determines how shiny something is
+  double reflection_; // Unused for now
+  double transparency_; // Unused for now
+  double refraction_constant_; // Unused for now
 };
 
 #endif

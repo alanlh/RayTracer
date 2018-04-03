@@ -5,14 +5,18 @@
 
 #include <vector>
 
+#include "../objects/Drawable.h"
+
 class ColorMixer {
  public:
   ColorMixer();
   ColorMixer(ColorMixer &other);
 
   ColorMixer& operator=(ColorMixer &other);
-  
+
+  void AddObject(Drawable *object);
   void AddColor(HSLAPixel pix, unsigned type, double intensity);
+  void SetObjectInfo(Drawable *object);
 
   /** Mixes a set of colors by weights determined by type **/
   HSLAPixel RenderObjectColor();
@@ -21,25 +25,15 @@ class ColorMixer {
   HSLAPixel RenderAntiAlias();
   
   const static unsigned default_color_ = 0;
-  const static unsigned surface_color_ = 1;
-  const static unsigned directional_light_ = 2;
-  const static unsigned ambient_light_ = 3;
-
-  // These are currently placeholders. Not used. 
-  // Surface color provides most of the color, but little luminosity.
-  constexpr static double default_surface_weight_ = 1;
-  // Lights provide most of the luminosity, but do not significant affect color
-  // The color change is weighted by saturation. 
-  constexpr static double default_light_weight_ = 1.5;
+  const static unsigned light_ = 0; // Ambient and other lights
+  // Other sources: transparency? Or 
   
  private:
   std::vector<HSLAPixel> colors;
   std::vector<unsigned> types;
   std::vector<double> intensities;
 
-  // Currently stays at one, but should depend on object
-  double surface_weight_;
-  double light_weight_;
+  Drawable *object_;
 
   double sigmoid(double in);
   double inverse(double in);
