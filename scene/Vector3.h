@@ -34,5 +34,7 @@ class Vector3 {
 double distance(Vector3 first, Vector3 second);
 double dotProduct(Vector3 first, Vector3 second);
 Vector3 crossProduct(Vector3 first, Vector3 second);
+Vector3 min(Vector3 first, Vector3 second);
+Vector3 max(Vector3 first, Vector3 second);
 
 #endif

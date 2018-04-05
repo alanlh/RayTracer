@@ -11,12 +11,14 @@
 #include "Ray.h"
 #include "Vector3.h"
 #include "../image/ColorMixer.h"
-#include "objects/ObjectTree.h"
+#include "../objects/ObjectTree.h"
 
 Scene::Scene() {
   objects_ = new vector<Drawable *>;
   lights_ = new vector<LightSource *>;
   ambients_ = new vector<AmbientLight *>;
+
+  tree_ = NULL;
 }
 
 Scene::Scene(Scene &other) {
@@ -74,17 +76,26 @@ Scene::~Scene() {
 void Scene::deleteObjects() {
   for (std::vector<Drawable *>::iterator it = objects_->begin();
        it != objects_->end(); ++ it) {
-    delete (*it);
+    if (it != NULL) {
+      delete (*it);
+      &(*it) = NULL;
+    }
   }
   
   for (std::vector<LightSource *>::iterator it = lights_->begin();
        it != lights_->end(); ++ it) {
-    delete (*it);
+    if (it != NULL) {
+      delete (*it);
+      &(*it) = NULL;
+    }
   }
   
   for (std::vector<AmbientLight *>::iterator it = ambients_->begin();
        it != ambients_->end(); ++ it) {
-    delete (*it);
+    if (it != NULL) {
+      delete (*it);
+      &(*it) = NULL;
+    }
   }
   
   delete objects_;
@@ -93,9 +104,12 @@ void Scene::deleteObjects() {
 }
 
 void Scene::AddDrawable(Drawable *object) {
-  objects_->push_back(object);
+  objects_->add(object);
 }
 
+/**
+ * DO NOT CALL. NOT BEING UPDATED FOR BVHs
+ */
 void Scene::RemoveDrawable(Drawable *object) {
   for (unsigned i = 0; i < objects_->size(); i ++) {
     if (objects_->at(i) == object) {
@@ -146,6 +160,8 @@ void Scene::SetCamera(Vector3 source, double tilt, Vector3 canvas, double zoom) 
 PNG * Scene::Render(unsigned width, unsigned height) {
   PNG *image = new PNG(width, height);
 
+  tree_ = new ObjectTree(objects_);
+
   Vector3 point_direction = canvas_.center;
   point_direction = point_direction - camera_.point;
 
@@ -176,7 +192,7 @@ PNG * Scene::Render(unsigned width, unsigned height) {
 	Vector3 pixel_coordinate = canvas_.center + pixel_x_offset + pixel_y_offset;
 	Ray ray(camera_.point, pixel_coordinate - camera_.point);
 	HSLAPixel color = GetPixColor(ray, 1);
-
+	
 	final_pix.AddColor(color, 0, color.l);
 
       }
@@ -184,11 +200,16 @@ PNG * Scene::Render(unsigned width, unsigned height) {
       image_pix = final_pix.RenderAntiAlias();
     }
   }
+  delete tree_;
+  tree_ = NULL;
+  
   return image;
 }
 
 PNG * Scene::RenderOrthographic(unsigned width, unsigned height) {
   PNG *image = new PNG(width, height);
+
+  tree_ = new ObjectTree(objects_);
 
   Vector3 point_direction = canvas_.center - camera_.point;
 
@@ -225,6 +246,9 @@ PNG * Scene::RenderOrthographic(unsigned width, unsigned height) {
       image_pix = final_pix.RenderAntiAlias();
     }
   }
+  delete tree_;
+  tree_ = NULL;
+  
   return image;
 }
 

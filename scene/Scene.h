@@ -9,7 +9,7 @@
 #include "../objects/Drawable.h"
 #include "../image/PNG.h"
 #include "Ray.h"
-#include "objects/ObjectTree.h"
+#include "../objects/ObjectTree.h"
 
 class Scene {
  public:
@@ -66,8 +66,9 @@ class Scene {
   /**
    * Goes through the list of objects and determines it is within it.
    * Removes if so. 
+   * Don't call. Doesn't work yet.
    */
-  void RemoveObject(Drawable *object);
+  void RemoveDrawable(Drawable *object);
 
   void AddLightSource(LightSource *light);
   void RemoveLightSource(LightSource *light);
@@ -94,6 +95,8 @@ class Scene {
   std::vector<AmbientLight *> *ambients_;
   struct Camera camera_;
   struct Canvas canvas_;
+
+  ObjectTree *tree_;
 
   //const unsigned MAX_ITERATION_COUNT = 1;
 };

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <math.h>
+#include <cstdlib>
 
 #include "scene/Scene.h"
 #include "image/HSLAPixel.h"
@@ -11,7 +12,56 @@
 #include "objects/Plane.h"
 #include "scene/Vector3.h"
 
+void helloworld();
+void lotsospheres(int sphere_count);
+
 int main() {
+  lotsospheres(500);
+
+  return 0;
+}
+
+void lotsospheres(int sphere_count) {
+  srand(time(0));
+  Scene *scene = new Scene();
+
+  Scene::AmbientLight *ambient1 = new Scene::AmbientLight();
+  ambient1->color = HSLAPixel(60, 0.75, 1);
+  ambient1->intensity = 5;
+  scene->AddAmbientLight(ambient1);
+  
+  Scene::LightSource *light1 = new Scene::LightSource();
+  light1->direction = Vector3(1, -1, 1);
+  light1->color = HSLAPixel(120, 1, 1);
+  light1->intensity = 5;
+  scene->AddLightSource(light1);
+  
+  for (int i = 0; i < sphere_count; i ++) {
+    int x = rand() % 50 - 25;
+    int y = rand() % 50 - 25;
+    int z = rand() % 50 + 25;
+
+    Sphere *sphere = new Sphere();
+    sphere->center_ = Vector3(x, y, z);
+    sphere->radius_ = 1;
+    sphere->surface_color_.h = rand() % 360;
+    sphere->surface_color_.s = 1;
+    sphere->surface_color_.l = 0.5;
+    scene->AddDrawable(sphere);
+  }
+  Vector3 origin(45, 30, -100);
+  Vector3 canvas(15, 10, 0);
+  scene->SetCamera(origin, 0, canvas, 900);
+
+  PNG * result = scene->Render(600, 600);
+  result->writeToFile("sphereslow10.png");
+      
+  delete scene;
+  
+  delete result;
+}
+
+void helloworld() {
   Scene *scene = new Scene();
   Sphere *sphere1 = new Sphere();
   sphere1->center_ = Vector3(6, -1, -1);
@@ -91,13 +141,13 @@ int main() {
   
   Scene::AmbientLight *ambient1 = new Scene::AmbientLight();
   ambient1->color = HSLAPixel(60, 0.75, 1);
-  ambient1->intensity = 10;
+  ambient1->intensity = 2;
   scene->AddAmbientLight(ambient1);
   
   Scene::LightSource *light1 = new Scene::LightSource();
   light1->direction = Vector3(1, -1, 1);
   light1->color = HSLAPixel(120, 1, 1);
-  light1->intensity = 10;
+  light1->intensity = 5;
   scene->AddLightSource(light1);
   
   Scene::LightSource *light2 = new Scene::LightSource();
@@ -108,19 +158,11 @@ int main() {
   
   Vector3 origin(0, 7, 1);
   Vector3 canvas(1.5, 5.5, 0.8);
-  scene->SetCamera(origin, 0, canvas, 1200);
+  scene->SetCamera(origin, 0, canvas, 900);
   
-  PNG * result = scene->Render(800, 800);
-  result->writeToFile("helloworld2.png");
-  
-  // Zoom out because Orthogonal field-of-view is much
-  scene->SetCamera(origin, 0, canvas, 100);
-  
-  //PNG * result_orthographic = scene->RenderOrthographic(200, 200);
-  //result_orthographic->writeToFile("hello_ortho.png");
-  
+  PNG * result = scene->Render(600, 600);
+  result->writeToFile("helloworld.png");
+      
   delete scene;
   delete result;
-  //delete result_orthographic;
-  return 0;
 }

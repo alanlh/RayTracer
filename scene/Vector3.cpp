@@ -129,3 +129,19 @@ Vector3 crossProduct(Vector3 first, Vector3 second) {
 		 first.z_ * second.x_ - first.x_ * second.z_,
 		 first.x_ * second.y_ - first.y_ * second.x_);
 }
+
+Vector3 min(Vector3 first, Vector3 second) {
+  double x = first.x_ < second.x_ ? first.x_ : second.x_;
+  double y = first.y_ < second.y_ ? first.y_ : second.y_;
+  double z = first.z_ < second.z_ ? first.z_ : second.z_;
+
+  return Vector3(x, y, z);
+}
+
+Vector3 max(Vector3 first, Vector3 second) {
+  double x = first.x_ > second.x_ ? first.x_ : second.x_;
+  double y = first.y_ > second.y_ ? first.y_ : second.y_;
+  double z = first.z_ > second.z_ ? first.z_ : second.z_;
+
+  return Vector3(x, y, z);
+}
