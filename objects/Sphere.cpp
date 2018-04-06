@@ -53,3 +53,27 @@ Vector3 Sphere::GetPerpendicular(Ray ray, double d) {
   return point - center_;
 }
 
+Vector3 Sphere::min() {
+  return Vector3(center_.x_ - radius_,
+		 center_.y_ - radius_,
+		 center_.z_ - radius_);
+}
+
+Vector3 Sphere::max() {
+  return Vector3(center_.x_ + radius_,
+		 center_.y_ + radius_,
+		 center_.z_ + radius_);
+}
+
+double Sphere::center(int axis) {
+  if (axis == 0) {
+    return center_.x_;
+  }
+  if (axis == 1) {
+    return center_.y_;
+  }
+  if (axis == 2) {
+    return center_.z_;
+  }
+  return 0;
+}

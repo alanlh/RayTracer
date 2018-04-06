@@ -11,6 +11,21 @@ class Triangle : public Drawable {
   ~Triangle();
   double Intersects(Ray ray);
   Vector3 GetPerpendicular(Ray ray, double d);
+
+  /**
+   * Finds the minimum coordinates of each of the 3 points
+   */
+  virtual Vector3 min();
+
+  /**
+   * Finds the maximum coordinates of each of the 3 points
+   */
+  virtual Vector3 max();
+
+  /**
+   * Uses the centroid
+   */
+  virtual double center(int axis);
   
   Vector3 a_;
   Vector3 b_;

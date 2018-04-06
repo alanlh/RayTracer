@@ -16,8 +16,7 @@ void helloworld();
 void lotsospheres(int sphere_count);
 
 int main() {
-  lotsospheres(500);
-
+  lotsospheres(2500);
   return 0;
 }
 
@@ -54,7 +53,7 @@ void lotsospheres(int sphere_count) {
   scene->SetCamera(origin, 0, canvas, 900);
 
   PNG * result = scene->Render(600, 600);
-  result->writeToFile("sphereslow10.png");
+  result->writeToFile("spheresfast.png");
       
   delete scene;
   

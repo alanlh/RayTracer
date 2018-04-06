@@ -9,8 +9,17 @@ class Plane : public Drawable {
  public:
   Plane();
   ~Plane();
-  double Intersects(Ray ray);
-  Vector3 GetPerpendicular(Ray ray, double d);
+  virtual double Intersects(Ray ray);
+  virtual Vector3 GetPerpendicular(Ray ray, double d);
+
+  // Returns very large and very small numbers, because planes extend to inf.
+  virtual Vector3 min();
+  virtual Vector3 max();
+
+  /**
+   * Since there is no real center, use the centroid instead
+   */
+  virtual double center(int axis);
   
   Vector3 a_;
   Vector3 b_;

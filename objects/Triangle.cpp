@@ -61,3 +61,28 @@ Vector3 Triangle::GetPerpendicular(Ray ray, double d) {
   }
   return normal;
 }
+
+Vector3 Triangle::min() {
+  return Vector3(std::min(a_.x_, std::min(b_.x_, c_.x_)),
+		 std::min(a_.y_, std::min(b_.y_, c_.y_)),
+		 std::min(a_.z_, std::min(b_.z_, c_.z_)));
+}
+
+Vector3 Triangle::max() {
+  return Vector3(std::max(a_.x_, std::max(b_.x_, c_.x_)),
+		 std::max(a_.y_, std::max(b_.y_, c_.y_)),
+		 std::max(a_.z_, std::max(b_.z_, c_.z_)));
+}
+
+double Triangle::center(int axis) {
+  if (axis == 0) {
+    return (a_.x_ + b_.x_ + c_.x_) / 3;
+  }
+  if (axis == 1) {
+    return (a_.y_ + b_.y_ + c_.y_) / 3;
+  }
+  if (axis == 2) {
+    return (a_.z_ + b_.z_ + c_.z_) / 3;
+  }
+  return 0;
+}

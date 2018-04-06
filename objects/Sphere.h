@@ -11,6 +11,10 @@ class Sphere : public Drawable {
   ~Sphere();
   double Intersects(Ray ray);
   Vector3 GetPerpendicular(Ray ray, double d); 
+
+  virtual Vector3 min();
+  virtual Vector3 max();
+  virtual double center(int axis);
   
   double radius_;
   Vector3 center_;

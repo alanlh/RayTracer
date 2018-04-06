@@ -76,25 +76,25 @@ Scene::~Scene() {
 void Scene::deleteObjects() {
   for (std::vector<Drawable *>::iterator it = objects_->begin();
        it != objects_->end(); ++ it) {
-    if (it != NULL) {
+    if (*it != NULL) {
       delete (*it);
-      &(*it) = NULL;
+      (*it) = NULL;
     }
   }
   
   for (std::vector<LightSource *>::iterator it = lights_->begin();
        it != lights_->end(); ++ it) {
-    if (it != NULL) {
+    if (*it != NULL) {
       delete (*it);
-      &(*it) = NULL;
+      (*it) = NULL;
     }
   }
   
   for (std::vector<AmbientLight *>::iterator it = ambients_->begin();
        it != ambients_->end(); ++ it) {
-    if (it != NULL) {
+    if (*it != NULL) {
       delete (*it);
-      &(*it) = NULL;
+      (*it) = NULL;
     }
   }
   
@@ -104,7 +104,7 @@ void Scene::deleteObjects() {
 }
 
 void Scene::AddDrawable(Drawable *object) {
-  objects_->add(object);
+  objects_->push_back(object);
 }
 
 /**
@@ -160,7 +160,7 @@ void Scene::SetCamera(Vector3 source, double tilt, Vector3 canvas, double zoom) 
 PNG * Scene::Render(unsigned width, unsigned height) {
   PNG *image = new PNG(width, height);
 
-  tree_ = new ObjectTree(objects_);
+  tree_ = new ObjectTree(*objects_);
 
   Vector3 point_direction = canvas_.center;
   point_direction = point_direction - camera_.point;
@@ -209,7 +209,7 @@ PNG * Scene::Render(unsigned width, unsigned height) {
 PNG * Scene::RenderOrthographic(unsigned width, unsigned height) {
   PNG *image = new PNG(width, height);
 
-  tree_ = new ObjectTree(objects_);
+  tree_ = new ObjectTree(*objects_);
 
   Vector3 point_direction = canvas_.center - camera_.point;
 
@@ -234,10 +234,13 @@ PNG * Scene::RenderOrthographic(unsigned width, unsigned height) {
       for (int k = 0; k < rpp; k ++) {
 	double x_rand = ((double) rand() / RAND_MAX) - 0.5;
 	double y_rand = ((double) rand() / RAND_MAX) - 0.5;
-	Vector3 pixel_x_offset = rightXDirection * (i + x_rand - w/2 + 1/2) * (1 / canvas_.zoomRatio);
-	Vector3 pixel_y_offset = topYDirection * (j + y_rand- h/2 + 1/2) * (-1 / canvas_.zoomRatio);
+	Vector3 pixel_x_offset = rightXDirection * (i + x_rand - w/2 + 1/2)
+	  * (1 / canvas_.zoomRatio);
+	Vector3 pixel_y_offset = topYDirection * (j + y_rand- h/2 + 1/2)
+	  * (-1 / canvas_.zoomRatio);
 	
-	Vector3 pixel_coordinate = camera_.point + pixel_x_offset + pixel_y_offset;
+	Vector3 pixel_coordinate = camera_.point
+	  + pixel_x_offset + pixel_y_offset;
 	Ray ray(pixel_coordinate, canvas_.center - camera_.point);
 	HSLAPixel color = GetPixColor(ray, 1);
 	final_pix.AddColor(color, 0, 1);
@@ -257,22 +260,10 @@ HSLAPixel Scene::GetPixColor(Ray ray, unsigned iteration) {
     // For shadows, reflection, etc.
     return HSLAPixel();
   }
-  double minDistance = 0;
-  Drawable *closestObject = NULL;
-  for (Drawable *object : *objects_) {
-    double distance = object->Intersects(ray);
-    if (minDistance <= 0 && distance >= 0) {
-      minDistance = distance;
-      closestObject = object;
-    } else if (distance > 0) {
-      if (distance < minDistance) {
-	minDistance = distance;
-	closestObject = object;
-      }
-    }
-  }
+  Drawable *closestObject = tree_->intersect(ray);
   ColorMixer pix;
   if (closestObject != NULL) {
+    double minDistance = closestObject->Intersects(ray);
     pix.AddObject(closestObject);
 
     Vector3 perp = closestObject->GetPerpendicular(ray, minDistance);
