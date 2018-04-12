@@ -181,7 +181,7 @@ PNG * Scene::Render(unsigned width, unsigned height) {
   for (int i = 0; i < w; i ++) {
     for (int j = 0; j < h; j ++) {
       // TODO: Create separate methods to do multiple times and with jitter
-      int rpp = 4; // Rays Per Pixel
+      int rpp = 1; // Rays Per Pixel
       ColorMixer final_pix;
       for (int k = 0; k < rpp; k ++) {
 	double x_rand = ((double) rand() / RAND_MAX) - 0.5;
@@ -229,7 +229,7 @@ PNG * Scene::RenderOrthographic(unsigned width, unsigned height) {
   for (int i = 0; i < w; i ++) {
     for (int j = 0; j < h; j ++) {
       // TODO: Create separate methods to do multiple times and with jitter
-      int rpp = 4; // Rays Per Pixel
+      int rpp = 1; // Rays Per Pixel
       ColorMixer final_pix;
       for (int k = 0; k < rpp; k ++) {
 	double x_rand = ((double) rand() / RAND_MAX) - 0.5;
@@ -266,19 +266,34 @@ HSLAPixel Scene::GetPixColor(Ray ray, unsigned iteration) {
     double minDistance = closestObject->Intersects(ray);
     pix.AddObject(closestObject);
 
+    // In direction away from surface
     Vector3 perp = closestObject->GetPerpendicular(ray, minDistance);
     for (LightSource *light : *lights_) {
       // If light->direction = 0, then create vector by comparing the start point.
       
-      double weight = dotProduct(perp, light->direction) /
+      double diffuse_weight = dotProduct(perp, light->direction) /
 	(perp.magnitude() * light->direction.magnitude());
-      if (weight < 0) {
+      if (diffuse_weight < 0) {
 	// TODO: Implement operator* on HSLAPixel
 	pix.AddColor(light->color, ColorMixer::light_,
-		     light->intensity * closestObject->diffusion_ * weight * -1);
+		     light->intensity * closestObject->diffusion_ * diffuse_weight * -1);
       } else {
 	//cs225::HSLAPixel unseen_light = cs225::HSLAPixel(light->color.h, light->color.s, 0);
 	//pix.AddColor(unseen_light, ColorMixer::directional_light_);
+      }
+
+      Vector3 reflection = perp * (dotProduct(perp, light->direction) * -2 /
+				   (perp.magnitude() * perp.magnitude()
+				    * light->direction.magnitude()))
+	- light->direction * (1 / light->direction.magnitude());
+      double specular_weight = dotProduct(ray.direction, reflection) /
+	(ray.direction.magnitude() * reflection.magnitude());
+      if (specular_weight < 0) {
+	//pix.AddColor(light->color, ColorMixer::light_,
+	//	     closestObject->specular_ *
+	//	     pow(light->intensity * specular_weight * -1,
+	//		 closestObject->shininess_));
+      //std::cout << light->intensity * specular_weight * -1 << std::endl;
       }
     }
   }

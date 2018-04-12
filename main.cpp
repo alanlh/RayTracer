@@ -14,10 +14,59 @@
 
 void helloworld();
 void lotsospheres(int sphere_count);
+void simpleobjects();
 
 int main() {
-  lotsospheres(2500);
+  helloworld();
   return 0;
+}
+
+void simpleobjects() {
+  Scene *scene = new Scene();
+
+  Scene::AmbientLight *ambient1 = new Scene::AmbientLight();
+  ambient1->color = HSLAPixel(0, 0.5, 1);
+  ambient1->intensity = 5;
+  scene->AddAmbientLight(ambient1);
+
+  Scene::LightSource *light1 = new Scene::LightSource();
+  light1->direction = Vector3(1, -1, 3);
+  light1->color = HSLAPixel(120, 1, 1);
+  light1->intensity = 4;
+  scene->AddLightSource(light1);
+
+  Sphere *sphere = new Sphere();
+  sphere->center_ = Vector3(0, 0, 4);
+  sphere->radius_ = 1;
+  sphere->surface_color_.h = 180;
+  sphere->surface_color_.s = 1;
+  sphere->surface_color_.l = 0.5;
+  scene->AddDrawable(sphere);
+
+  Triangle *triangle1 = new Triangle();
+  triangle1->a_ = Vector3(2, 0, 3);
+  triangle1->b_ = Vector3(0, 6, 8);
+  triangle1->c_ = Vector3(0, -6, 8);
+  triangle1->surface_color_ = HSLAPixel(270, 0.5, 0.7);
+  scene->AddDrawable(triangle1);
+
+  Triangle *triangle2 = new Triangle();
+  triangle2->a_ = Vector3(-2, 0, 3);
+  triangle2->b_ = Vector3(0, 6, 8);
+  triangle2->c_ = Vector3(0, -6, 8);
+  triangle2->surface_color_ = HSLAPixel(90, 0.8, 0.4);
+  scene->AddDrawable(triangle2);
+  
+  Vector3 origin(0, 0, -1);
+  Vector3 canvas(0, 0, 0);
+  scene->SetCamera(origin, 0, canvas, 600);
+
+  PNG * result = scene->Render(400, 400);
+  result->writeToFile("simpleobjects.png");
+      
+  delete scene;
+  
+  delete result;  
 }
 
 void lotsospheres(int sphere_count) {

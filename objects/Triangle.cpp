@@ -18,10 +18,15 @@ Triangle::~Triangle() {
 }
 
 double Triangle::Intersects(Ray ray) {
-  if (dotProduct(ray.direction, crossProduct(b_ - a_, c_ - a_)) < 0.001) {
+  double plane_angle = dotProduct(ray.direction,
+				  crossProduct(b_ - a_, c_ - a_)) < 0.001;
+
+  if (plane_angle < 0.001 && plane_angle > 0.001) {
     return -1;
     // If ray is parallel to plane, then will never intersect
   }
+
+  // Check where object intersects plane
   Vector3 n = GetPerpendicular(ray, 0);
   double distance = (dotProduct(n, ray.source + a_))
     / (dotProduct(n, ray.direction));
@@ -29,24 +34,23 @@ double Triangle::Intersects(Ray ray) {
     return -1;
   }
 
+  // CHeck intersect object
   Vector3 intersectPoint = ray.point(distance);
-
   Vector3 edge1 = b_ - a_;
   Vector3 edge2 = c_ - b_;
   Vector3 edge3 = a_ - c_;
   Vector3 p1 = intersectPoint - a_;
   Vector3 p2 = intersectPoint - b_;
   Vector3 p3 = intersectPoint - c_;
-  //std::cout << dotProduct(n, crossProduct(edge1, p1)) << std::endl;
-  // std::cout << dotProduct(n, crossProduct(edge2, p2)) << std::endl;
-  // std::cout << dotProduct(n, crossProduct(edge3, p3)) << std::endl;
-  // std::cout << std::endl;
   
   // Used formula from
   // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution
-  if (dotProduct(n, crossProduct(edge1, p1)) < 0 && 
-      dotProduct(n, crossProduct(edge2, p2)) < 0 && 
-      dotProduct(n, crossProduct(edge3, p3)) < 0) {
+  if ((dotProduct(n, crossProduct(edge1, p1)) < 0.001 && 
+      dotProduct(n, crossProduct(edge2, p2)) < 0.001 && 
+       dotProduct(n, crossProduct(edge3, p3)) < 0.001) ||
+      (dotProduct(n, crossProduct(edge1, p1)) > -0.001 && 
+       dotProduct(n, crossProduct(edge2, p2)) > -0.001 && 
+       dotProduct(n, crossProduct(edge3, p3)) > -0.001)) {
     return distance;
   } else {
     return -1;
