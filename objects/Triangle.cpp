@@ -19,18 +19,18 @@ Triangle::~Triangle() {
 
 double Triangle::Intersects(Ray ray) {
   double plane_angle = dotProduct(ray.direction,
-				  crossProduct(b_ - a_, c_ - a_)) < 0.001;
+				  crossProduct(b_ - a_, c_ - a_));
 
-  if (plane_angle < 0.001 && plane_angle > 0.001) {
+  if (plane_angle < 0.00000001 && plane_angle > -0.00000001) {
     return -1;
     // If ray is parallel to plane, then will never intersect
   }
 
   // Check where object intersects plane
   Vector3 n = GetPerpendicular(ray, 0);
-  double distance = (dotProduct(n, ray.source + a_))
+  double distance = (dotProduct(n, a_ - ray.source))
     / (dotProduct(n, ray.direction));
-  if (distance < 0) {
+  if (distance < 0.00000001) {
     return -1;
   }
 
@@ -45,12 +45,12 @@ double Triangle::Intersects(Ray ray) {
   
   // Used formula from
   // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution
-  if ((dotProduct(n, crossProduct(edge1, p1)) < 0.001 && 
-      dotProduct(n, crossProduct(edge2, p2)) < 0.001 && 
-       dotProduct(n, crossProduct(edge3, p3)) < 0.001) ||
-      (dotProduct(n, crossProduct(edge1, p1)) > -0.001 && 
-       dotProduct(n, crossProduct(edge2, p2)) > -0.001 && 
-       dotProduct(n, crossProduct(edge3, p3)) > -0.001)) {
+  if ((dotProduct(n, crossProduct(edge1, p1)) < 0.00000001 && 
+      dotProduct(n, crossProduct(edge2, p2)) < 0.00000001 && 
+       dotProduct(n, crossProduct(edge3, p3)) < 0.00000001) ||
+      (dotProduct(n, crossProduct(edge1, p1)) > -0.00000001 && 
+       dotProduct(n, crossProduct(edge2, p2)) > -0.00000001 && 
+       dotProduct(n, crossProduct(edge3, p3)) > -0.00000001)) {
     return distance;
   } else {
     return -1;
@@ -60,7 +60,7 @@ double Triangle::Intersects(Ray ray) {
 Vector3 Triangle::GetPerpendicular(Ray ray, double d) {
   d = 0;
   Vector3 normal = crossProduct(b_ - a_, c_ - a_);
-  if (dotProduct(ray.direction, normal) > 0) {
+  if (dotProduct(ray.direction, normal) > -0.00000001) {
     normal = normal * -1;
   }
   return normal;

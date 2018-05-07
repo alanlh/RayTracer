@@ -1,6 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <cstdlib>
+#include <ctime>
 
 #include "scene/Scene.h"
 #include "image/HSLAPixel.h"
@@ -15,10 +16,54 @@
 void helloworld();
 void lotsospheres(int sphere_count);
 void simpleobjects();
+void renderobj(std::string name, Vector3 origin, Vector3 canvas);
 
-int main() {
-  helloworld();
+int main(int argc, char** argv) {
+  time_t start = time(0);
+  
+  if (argc <= 0 || argc > 2) {
+    std::cout << "Invalid command. Please type ./render followed by "
+	      << "the name of your obj file w/o the .obj suffix."
+	      << "The obj file must be placed in the obj_files folder."
+	      << std::endl;
+    return 0;
+  } else if (argc == 2) {
+    renderobj(argv[1], Vector3(10, 10, 36), Vector3(9, 9.5, 32.4));
+    
+  } else {
+    helloworld();
+  }
+  time_t end = time(0);
+  double diff = difftime(end, start);
+  std::cout << "This render took " << diff << " seconds."  << std::endl;
+  
   return 0;
+}
+
+void renderobj(std::string name, Vector3 origin, Vector3 canvas) {
+  Scene *scene = new Scene();
+
+  scene->ParseObj("./obj_files/" + name + ".obj");
+
+  Scene::AmbientLight *ambient1 = new Scene::AmbientLight();
+  ambient1->color = HSLAPixel(0, 0.5, 1);
+  ambient1->intensity = 5;
+  scene->AddAmbientLight(ambient1);
+
+  Scene::LightSource *light1 = new Scene::LightSource();
+  light1->direction = Vector3(-4, -2, -1);
+  light1->color = HSLAPixel(120, 1, 1);
+  light1->intensity = 4;
+  scene->AddLightSource(light1);
+  
+  scene->SetCamera(origin, 0, canvas, 600);
+
+  PNG * result = scene->Render(400, 400);
+  result->writeToFile(name + ".png");
+      
+  delete scene;
+  
+  delete result;
 }
 
 void simpleobjects() {
@@ -30,13 +75,13 @@ void simpleobjects() {
   scene->AddAmbientLight(ambient1);
 
   Scene::LightSource *light1 = new Scene::LightSource();
-  light1->direction = Vector3(1, -1, 3);
+  light1->direction = Vector3(1, 0, 9);
   light1->color = HSLAPixel(120, 1, 1);
   light1->intensity = 4;
   scene->AddLightSource(light1);
 
   Sphere *sphere = new Sphere();
-  sphere->center_ = Vector3(0, 0, 4);
+  sphere->center_ = Vector3(0, 0, 6);
   sphere->radius_ = 1;
   sphere->surface_color_.h = 180;
   sphere->surface_color_.s = 1;
@@ -44,16 +89,16 @@ void simpleobjects() {
   scene->AddDrawable(sphere);
 
   Triangle *triangle1 = new Triangle();
-  triangle1->a_ = Vector3(2, 0, 3);
-  triangle1->b_ = Vector3(0, 6, 8);
-  triangle1->c_ = Vector3(0, -6, 8);
+  triangle1->a_ = Vector3(2, 0, 7);
+  triangle1->b_ = Vector3(0, 4, 8);
+  triangle1->c_ = Vector3(0, -4, 8);
   triangle1->surface_color_ = HSLAPixel(270, 0.5, 0.7);
   scene->AddDrawable(triangle1);
 
   Triangle *triangle2 = new Triangle();
-  triangle2->a_ = Vector3(-2, 0, 3);
-  triangle2->b_ = Vector3(0, 6, 8);
-  triangle2->c_ = Vector3(0, -6, 8);
+  triangle2->a_ = Vector3(-2, 0, 8);
+  triangle2->b_ = Vector3(0, 4, 8);
+  triangle2->c_ = Vector3(0, -4, 8);
   triangle2->surface_color_ = HSLAPixel(90, 0.8, 0.4);
   scene->AddDrawable(triangle2);
   

@@ -12,6 +12,7 @@
 #include "Vector3.h"
 #include "../image/ColorMixer.h"
 #include "../objects/ObjectTree.h"
+#include "Parser.h"
 
 Scene::Scene() {
   objects_ = new vector<Drawable *>;
@@ -107,6 +108,16 @@ void Scene::AddDrawable(Drawable *object) {
   objects_->push_back(object);
 }
 
+void Scene::ParseObj(std::string path) {
+  vector<Drawable *> *objects = Parser::ParseObjects(path);
+  for (Drawable * drawable : *objects) {
+    objects_->push_back(drawable);
+  }
+
+  // Should not delete the objects
+  delete objects;
+}
+
 /**
  * DO NOT CALL. NOT BEING UPDATED FOR BVHs
  */
@@ -168,7 +179,7 @@ PNG * Scene::Render(unsigned width, unsigned height) {
   //double canvas_distance = point_direction.magnitude();
   
   Vector3 z_plane = point_direction;
-  z_plane.pointTowardsZPos();
+  z_plane.pointTowardsYPos();
   Vector3 topYDirection = z_plane;
   topYDirection.rotate(camera_.tiltAngle, point_direction);
   Vector3 rightXDirection = topYDirection;
@@ -181,7 +192,7 @@ PNG * Scene::Render(unsigned width, unsigned height) {
   for (int i = 0; i < w; i ++) {
     for (int j = 0; j < h; j ++) {
       // TODO: Create separate methods to do multiple times and with jitter
-      int rpp = 1; // Rays Per Pixel
+      int rpp = 4; // Rays Per Pixel
       ColorMixer final_pix;
       for (int k = 0; k < rpp; k ++) {
 	double x_rand = ((double) rand() / RAND_MAX) - 0.5;
@@ -216,7 +227,7 @@ PNG * Scene::RenderOrthographic(unsigned width, unsigned height) {
   //double canvas_distance = point_direction.magnitude();
   
   Vector3 z_plane = point_direction;
-  z_plane.pointTowardsZPos();
+  z_plane.pointTowardsYPos();
   Vector3 topYDirection = z_plane;
   topYDirection.rotate(camera_.tiltAngle, point_direction);
   Vector3 rightXDirection = topYDirection;
@@ -229,7 +240,7 @@ PNG * Scene::RenderOrthographic(unsigned width, unsigned height) {
   for (int i = 0; i < w; i ++) {
     for (int j = 0; j < h; j ++) {
       // TODO: Create separate methods to do multiple times and with jitter
-      int rpp = 1; // Rays Per Pixel
+      int rpp = 4; // Rays Per Pixel
       ColorMixer final_pix;
       for (int k = 0; k < rpp; k ++) {
 	double x_rand = ((double) rand() / RAND_MAX) - 0.5;
@@ -283,19 +294,27 @@ HSLAPixel Scene::GetPixColor(Ray ray, unsigned iteration) {
       }
 
       Vector3 reflection = perp * (dotProduct(perp, light->direction) * -2 /
-				   (perp.magnitude() * perp.magnitude()
-				    * light->direction.magnitude()))
-	- light->direction * (1 / light->direction.magnitude());
-      double specular_weight = dotProduct(ray.direction, reflection) /
+				   (perp.magnitude() * perp.magnitude()))
+	+ light->direction;
+
+      double specular_weight = -1 * dotProduct(ray.direction, reflection) /
 	(ray.direction.magnitude() * reflection.magnitude());
-      if (specular_weight < 0) {
-	//pix.AddColor(light->color, ColorMixer::light_,
-	//	     closestObject->specular_ *
-	//	     pow(light->intensity * specular_weight * -1,
-	//		 closestObject->shininess_));
-      //std::cout << light->intensity * specular_weight * -1 << std::endl;
+      if (specular_weight > 0) {
+	pix.AddColor(light->color, ColorMixer::light_,
+		     closestObject->specular_ * light->intensity *
+		     pow(specular_weight, closestObject->shininess_));
       }
     }
+
+    Vector3 reflection = perp * (dotProduct(perp, ray.direction) * -2 /
+				 (perp.magnitude() * perp.magnitude()))
+      + ray.direction;
+
+    Ray reflection_ray(reflection, ray.point(minDistance));
+    HSLAPixel reflectionPixel = GetPixColor(reflection_ray, iteration + 1);
+    pix.AddColor(reflectionPixel, ColorMixer::light_,
+		 closestObject->reflection_);
+    
   }
   for (AmbientLight *ambient : *ambients_) {
     double intensity = ambient->intensity;

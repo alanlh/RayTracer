@@ -5,10 +5,11 @@
 
 Drawable::Drawable() {
   surface_color_ = HSLAPixel(180, 0.5, 0.5, 1);
-  ambient_ = 0.05;
+  ambient_ = 0.1;
   diffusion_ = 0.18;
-  specular_ = 0.05;
-  shininess_ = 5;
+  specular_ = 0.1;
+  shininess_ = 10;
+  reflection_ = 1;
 }
 
 Drawable::~Drawable() {

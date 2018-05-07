@@ -22,6 +22,8 @@ class Vector3 {
    * Points towards the negative-Z axis.
    */
   void pointTowardsZPos();
+  void pointTowardsYPos();
+
   void rotate(double angleDeg, Vector3 axis);
 
   void print();

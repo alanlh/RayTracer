@@ -44,7 +44,7 @@ double Vector3::magnitude() {
 }
 
 bool Vector3::isUnit() {
-  double maxError = 0.005;
+  double maxError = 0.00000001;
   return (pow(x_, 2) + pow(y_, 2) + pow(z_, 2) - 1 < maxError);
 }
 
@@ -63,13 +63,13 @@ void Vector3::makeUnitVector() {
  */
 void Vector3::pointTowardsZPos() {
   double magnitude = this->magnitude();
-  if (z_ == 0) {
+  if (fabs(z_) < 0.00000001) {
     x_ = 0;
     y_ = 0;
     z_ = fabs(magnitude);
     return;
   }
-  if (x_ == 0 && y_ == 0) {
+  if (fabs(x_) < 0.00000001 && fabs(y_) < 0.00000001) {
     x_ = fabs(z_);
     y_ = 0;
     z_ = 0;
@@ -85,6 +85,36 @@ void Vector3::pointTowardsZPos() {
   this->makeUnitVector();
   *this = (*this) * magnitude;
 }
+
+/* Picks the normal vector that maximizes the y-value. 
+ * If normal vector is perpendicular to y-axis, then points in +z direction.
+ * TODO: Make it so that when y_ ==0, point towards tilt angle
+ */
+void Vector3::pointTowardsYPos() {
+  double magnitude = this->magnitude();
+  if (fabs(y_) < 0.00000001) {
+    x_ = 0;
+    y_ = 0;
+    y_ = fabs(magnitude);
+    return;
+  }
+  if (fabs(z_) < 0.00000001 && fabs(x_) < 0.00000001) {
+    x_ = fabs(y_);
+    y_ = 0;
+    z_ = 0;
+    return;
+  }
+  
+  double new_x = -1 * y_ * y_ * y_ * y_ / (fabs(y_) * (x_ * x_ + z_ * z_));
+  double new_z = -1 * y_ * z_ * y_ * y_ / (fabs(y_) * (x_ * x_ + z_ * z_)); 
+  double new_y = fabs(y_);
+  x_ = new_x;
+  y_ = new_y;
+  z_ = new_z;
+  this->makeUnitVector();
+  *this = (*this) * magnitude;
+}
+
 
 /**
  * Rotates the vector angleDeg degrees clockwise about the given axis

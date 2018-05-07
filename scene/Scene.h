@@ -70,6 +70,8 @@ class Scene {
    */
   void RemoveDrawable(Drawable *object);
 
+  void ParseObj(std::string path);
+
   void AddLightSource(LightSource *light);
   void RemoveLightSource(LightSource *light);
 
