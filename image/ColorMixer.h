@@ -26,6 +26,7 @@ class ColorMixer {
   
   const static unsigned default_color_ = 0;
   const static unsigned light_ = 0; // Ambient and other lights
+  const static unsigned reflection_ = 1;
   // Other sources: transparency? Or 
   
  private:

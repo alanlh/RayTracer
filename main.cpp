@@ -17,6 +17,7 @@ void helloworld();
 void lotsospheres(int sphere_count);
 void simpleobjects();
 void renderobj(std::string name, Vector3 origin, Vector3 canvas);
+void reflectiontest();
 
 int main(int argc, char** argv) {
   time_t start = time(0);
@@ -28,10 +29,10 @@ int main(int argc, char** argv) {
 	      << std::endl;
     return 0;
   } else if (argc == 2) {
-    renderobj(argv[1], Vector3(10, 10, 36), Vector3(9, 9.5, 32.4));
+    renderobj(argv[1], Vector3(6, 4, 8), Vector3(5.4, 3.65, 7.2));
     
   } else {
-    helloworld();
+    reflectiontest();
   }
   time_t end = time(0);
   double diff = difftime(end, start);
@@ -40,11 +41,67 @@ int main(int argc, char** argv) {
   return 0;
 }
 
+void reflectiontest() {
+  Scene *scene = new Scene();
+
+  Plane *plane1 = new Plane();
+  plane1->a_ = Vector3(0, 0, 0);
+  plane1->b_ = Vector3(1, 0, 0);
+  plane1->c_ = Vector3(0, 0, 1);
+  plane1->surface_color_ = HSLAPixel(180, 0.25, 0.4);
+  plane1->reflection_ = 0.6;
+  scene->AddDrawable(plane1);
+
+  Sphere *sphere1 = new Sphere();
+  sphere1->center_ = Vector3(0, 1, 0);
+  sphere1->surface_color_ = HSLAPixel(90, 0.75, 0.3);
+  sphere1->radius_ = 1;
+  sphere1->reflection_ = 0;
+  scene->AddDrawable(sphere1);
+
+  Sphere *sphere2 = new Sphere();
+  sphere2->center_ = Vector3(2, 1, 2);
+  sphere2->surface_color_ = HSLAPixel(270, 0.6, 0.7);
+  sphere2->radius_ = 1;
+  sphere2->reflection_ = 0;
+  scene->AddDrawable(sphere2);
+
+  
+  Scene::AmbientLight *ambient1 = new Scene::AmbientLight();
+  ambient1->color = HSLAPixel(0, 0.5, 1);
+  ambient1->intensity = 2;
+  scene->AddAmbientLight(ambient1);
+
+  Scene::LightSource *light1 = new Scene::LightSource();
+  light1->direction = Vector3(-4, -2, -3);
+  light1->color = HSLAPixel(120, 1, 1);
+  light1->intensity = 4;
+  scene->AddLightSource(light1);
+
+  scene->SetCamera(Vector3(8, 1.5, 1.2), 0, Vector3(7.2, 1.35, 1.2), 900);
+
+  PNG * result = scene->Render(600, 600);
+  result->writeToFile("reflectiontest.png");
+      
+  delete scene;
+  
+  delete result;
+
+};
+
 void renderobj(std::string name, Vector3 origin, Vector3 canvas) {
   Scene *scene = new Scene();
 
   scene->ParseObj("./obj_files/" + name + ".obj");
 
+  Plane *plane1 = new Plane();
+  plane1->a_ = Vector3(0, 0, 0);
+  plane1->b_ = Vector3(1, 0, 0);
+  plane1->c_ = Vector3(0, 0, 1);
+  plane1->surface_color_ = HSLAPixel(90, 0, 0.4);
+  plane1->reflection_ = 0.6;
+  scene->AddDrawable(plane1);
+  
   Scene::AmbientLight *ambient1 = new Scene::AmbientLight();
   ambient1->color = HSLAPixel(0, 0.5, 1);
   ambient1->intensity = 5;
@@ -56,9 +113,9 @@ void renderobj(std::string name, Vector3 origin, Vector3 canvas) {
   light1->intensity = 4;
   scene->AddLightSource(light1);
   
-  scene->SetCamera(origin, 0, canvas, 600);
+  scene->SetCamera(origin, 0, canvas, 900);
 
-  PNG * result = scene->Render(400, 400);
+  PNG * result = scene->Render(600, 600);
   result->writeToFile(name + ".png");
       
   delete scene;

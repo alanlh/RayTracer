@@ -59,16 +59,24 @@ HSLAPixel ColorMixer::RenderObjectColor() {
     object_color = object_->surface_color_;
   }
 
-
   // bool small_change = false;
-  
+
+  if (colors.size() == 0) {
+    return HSLAPixel();
+  }
+
   HSLAPixel light = colors[0] * intensities[0];
+  
   // if (intensities[0] < 0.5) {
   //   std::cout << intensities[0] << " " << colors[0] << std::endl;
   //   small_change = true;
   // }
   for (unsigned i = 1; i < colors.size(); i ++) {
-    light = light + colors[i] * intensities[i];
+    //if (types[i] == ColorMixer::light_) {
+    if (intensities[i] > 0) {
+      light = light + colors[i] * intensities[i];
+    }
+      //}
     // if (intensities[i] < 0.5) {
     //   std::cout << intensities[i] << " " << colors[i] << std::endl;
     //   small_change = true;
@@ -86,32 +94,30 @@ HSLAPixel ColorMixer::RenderObjectColor() {
 HSLAPixel ColorMixer::RenderAntiAlias() {
   double prominent_hue = 0;
   double max_l = 0;
-  for (HSLAPixel color : colors) {
-    if (color.l > max_l) {
-      max_l = color.l;
-      prominent_hue = color.h;
+
+  for (unsigned i = 0; i < colors.size(); i ++) {
+    if (colors[i].l * intensities[i] > max_l) {
+      max_l = colors[i].l * intensities[i];
+      prominent_hue = colors[i].h;
     }
   }
 
-  double h = 0;
   double s = 0;
   double l = 0;
-  unsigned count = 0;
-  for (HSLAPixel color : colors) {
+  double count = 0;
+  for (unsigned i = 0; i < colors.size(); i ++) {
     // if (fabs(color.h - prominent_hue) < 60) {    
-      h += color.h;
-      s += color.s;
-      l += color.l;
-      count++;
+      s += colors[i].s * intensities[i];
+      l += colors[i].l * intensities[i];
+      count += intensities[i];
       //}
   }
   if (count > 0) {
-    h /= count;
     s /= count;
     l /= count;
   }  
   // Blend luminosities and saturation, but keep hue. 
-  return HSLAPixel(h, s, l);
+  return HSLAPixel(prominent_hue, s, l);
 }
 
 double ColorMixer::sigmoid(double in) {

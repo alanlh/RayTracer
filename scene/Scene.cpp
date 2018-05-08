@@ -267,55 +267,12 @@ PNG * Scene::RenderOrthographic(unsigned width, unsigned height) {
 }
 
 HSLAPixel Scene::GetPixColor(Ray ray, unsigned iteration) {
-  if (iteration > 3) { // REPLACE WITH MAX_ITERATION_COUNT
-    // For shadows, reflection, etc.
-    return HSLAPixel();
-  }
   Drawable *closestObject = tree_->intersect(ray);
   ColorMixer pix;
-  if (closestObject != NULL) {
-    double minDistance = closestObject->Intersects(ray);
-    pix.AddObject(closestObject);
 
-    // In direction away from surface
-    Vector3 perp = closestObject->GetPerpendicular(ray, minDistance);
-    for (LightSource *light : *lights_) {
-      // If light->direction = 0, then create vector by comparing the start point.
-      
-      double diffuse_weight = dotProduct(perp, light->direction) /
-	(perp.magnitude() * light->direction.magnitude());
-      if (diffuse_weight < 0) {
-	// TODO: Implement operator* on HSLAPixel
-	pix.AddColor(light->color, ColorMixer::light_,
-		     light->intensity * closestObject->diffusion_ * diffuse_weight * -1);
-      } else {
-	//cs225::HSLAPixel unseen_light = cs225::HSLAPixel(light->color.h, light->color.s, 0);
-	//pix.AddColor(unseen_light, ColorMixer::directional_light_);
-      }
+  bool reflectionExists = false;
+  HSLAPixel reflectionPixel;
 
-      Vector3 reflection = perp * (dotProduct(perp, light->direction) * -2 /
-				   (perp.magnitude() * perp.magnitude()))
-	+ light->direction;
-
-      double specular_weight = -1 * dotProduct(ray.direction, reflection) /
-	(ray.direction.magnitude() * reflection.magnitude());
-      if (specular_weight > 0) {
-	pix.AddColor(light->color, ColorMixer::light_,
-		     closestObject->specular_ * light->intensity *
-		     pow(specular_weight, closestObject->shininess_));
-      }
-    }
-
-    Vector3 reflection = perp * (dotProduct(perp, ray.direction) * -2 /
-				 (perp.magnitude() * perp.magnitude()))
-      + ray.direction;
-
-    Ray reflection_ray(reflection, ray.point(minDistance));
-    HSLAPixel reflectionPixel = GetPixColor(reflection_ray, iteration + 1);
-    pix.AddColor(reflectionPixel, ColorMixer::light_,
-		 closestObject->reflection_);
-    
-  }
   for (AmbientLight *ambient : *ambients_) {
     double intensity = ambient->intensity;
     if (closestObject != NULL) {
@@ -323,5 +280,65 @@ HSLAPixel Scene::GetPixColor(Ray ray, unsigned iteration) {
     }
     pix.AddColor(ambient->color, ColorMixer::light_, intensity);
   }
-  return pix.RenderObjectColor();
+  
+  if (closestObject != NULL) {
+    double minDistance = closestObject->Intersects(ray);
+    pix.AddObject(closestObject);
+
+    Vector3 perp = closestObject->GetPerpendicular(ray, minDistance);
+    Vector3 reflection = perp * (dotProduct(perp, ray.direction) * -2 /
+				 (perp.magnitude() * ray.direction.magnitude()))
+      + ray.direction;
+    
+    // In direction away from surface
+    for (LightSource *light : *lights_) {
+      // If light->direction = 0, then create vector by comparing the start point.
+
+      Ray lightReached(ray.point(minDistance) - light->direction * 0.001, light->direction * -1);
+
+        if (tree_->intersect(lightReached) == NULL) {
+      
+	double diffuse_weight = dotProduct(perp, light->direction) /
+	  (perp.magnitude() * light->direction.magnitude());
+	if (diffuse_weight < 0) {
+	// TODO: Implement operator* on HSLAPixel
+	  pix.AddColor(light->color, ColorMixer::light_,
+		       light->intensity * closestObject->diffusion_ * diffuse_weight * -1);
+	} else {
+	  pix.AddColor(light->color, ColorMixer::light_, 0);
+	}
+	double specular_weight = -1 * dotProduct(ray.direction, reflection) /
+	  (ray.direction.magnitude() * reflection.magnitude());
+	if (specular_weight > 0) {
+	  pix.AddColor(light->color, ColorMixer::light_,
+		       closestObject->specular_ * light->intensity *
+		       pow(specular_weight, closestObject->shininess_));
+	}
+	
+	}
+    }    
+    Ray reflection_ray(ray.point(minDistance) + reflection * 0.01, reflection);
+
+    if (iteration < 2 && tree_->intersect(reflection_ray) != NULL) {
+      reflectionExists = true;
+      reflectionPixel = GetPixColor(reflection_ray, iteration + 1);
+      /*
+      pix.AddColor(reflectionPixel, ColorMixer::reflection_,
+      closestObject->reflection_);*/
+    } 
+  }
+  
+  //return pix.RenderObjectColor();
+  
+  HSLAPixel naturalColor = pix.RenderObjectColor();
+  ColorMixer final;
+  if (closestObject != NULL && reflectionExists) {
+      final.AddColor(naturalColor, ColorMixer::light_, 1 - closestObject->reflection_);
+      final.AddColor(reflectionPixel, ColorMixer::light_, closestObject->reflection_);
+  } else {
+    return naturalColor;
+  }
+  // TODO: Change name of function or adapt it. 
+  return final.RenderAntiAlias();
+  
 }

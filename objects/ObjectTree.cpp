@@ -231,7 +231,7 @@ bool ObjectTree::ObjectTreeNode::intersectPlane(Ray ray, double ray_ori,
   if (t < 0) {
     return false;
   }
-  double ERROR = -0.00000001;
+  double ERROR = -0.000001;
   Vector3 intersectPoint = ray.source + ray.direction * t;
   Vector3 distToMin = intersectPoint - min_;
   Vector3 distToMax = max_ - intersectPoint;

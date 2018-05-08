@@ -36,7 +36,7 @@ std::vector<Drawable *> *Parser::ParseObjects(std::string path) {
 	exit(1);
       }
 
-      Vector3 vec(10 * a, 10 * b, 10 * c);
+      Vector3 vec(a, b, c);
       vertexCoordinates.push_back(vec);
       
     } else if (line.at(0) == 'f'){

@@ -9,7 +9,7 @@ Drawable::Drawable() {
   diffusion_ = 0.18;
   specular_ = 0.1;
   shininess_ = 10;
-  reflection_ = 1;
+  reflection_ = 0;
 }
 
 Drawable::~Drawable() {

@@ -19,9 +19,9 @@ Plane::~Plane() {
 }
 
 double Plane::Intersects(Ray ray) {
-  if (dotProduct(ray.direction, crossProduct(b_ - a_, c_ - a_)) < 0.00000001
+  if (dotProduct(ray.direction, crossProduct(b_ - a_, c_ - a_)) < 0.00001
       && dotProduct(ray.direction, crossProduct(b_ - a_, c_ - a_))
-      > -0.00000001) {
+      > -0.00001) {
     // If ray is parallel to plane, then will never intersect
     return -1;
   }

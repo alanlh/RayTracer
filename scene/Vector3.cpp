@@ -44,7 +44,7 @@ double Vector3::magnitude() {
 }
 
 bool Vector3::isUnit() {
-  double maxError = 0.00000001;
+  double maxError = 0.00001;
   return (pow(x_, 2) + pow(y_, 2) + pow(z_, 2) - 1 < maxError);
 }
 
@@ -63,13 +63,13 @@ void Vector3::makeUnitVector() {
  */
 void Vector3::pointTowardsZPos() {
   double magnitude = this->magnitude();
-  if (fabs(z_) < 0.00000001) {
+  if (fabs(z_) < 0.00001) {
     x_ = 0;
     y_ = 0;
     z_ = fabs(magnitude);
     return;
   }
-  if (fabs(x_) < 0.00000001 && fabs(y_) < 0.00000001) {
+  if (fabs(x_) < 0.00001 && fabs(y_) < 0.00001) {
     x_ = fabs(z_);
     y_ = 0;
     z_ = 0;
@@ -92,13 +92,13 @@ void Vector3::pointTowardsZPos() {
  */
 void Vector3::pointTowardsYPos() {
   double magnitude = this->magnitude();
-  if (fabs(y_) < 0.00000001) {
+  if (fabs(y_) < 0.00001) {
     x_ = 0;
     y_ = 0;
     y_ = fabs(magnitude);
     return;
   }
-  if (fabs(z_) < 0.00000001 && fabs(x_) < 0.00000001) {
+  if (fabs(z_) < 0.00001 && fabs(x_) < 0.00001) {
     x_ = fabs(y_);
     y_ = 0;
     z_ = 0;
